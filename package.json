@@ -1,0 +1,27 @@
+{
+  "name": "dummy-api",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsx watch  src/index.ts",
+    "db:seed": "tsx src/db/seed.ts"
+  },
+  "keywords": [],
+  "author": "t7yang <t7yang@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cookie": "^9.2.0",
+    "@fastify/static": "^6.12.0",
+    "fastify": "^4.25.1",
+    "fastify-cors": "^6.1.0",
+    "lowdb": "^6.1.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
