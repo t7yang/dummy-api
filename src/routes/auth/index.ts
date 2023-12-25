@@ -39,4 +39,22 @@ export const authRoutes = async (fastify: FastifyInstance) => {
 
     reply.send({ message: 'Logout successful' });
   });
+
+  fastify.get('/profile', async (request, reply) => {
+    const sessionId = request.cookies.session;
+    const session = db.data.sessions[sessionId || ''];
+
+    if (!sessionId || !session) return reply.status(401).send('Invalid, no session found');
+    if (session.expired < Date.now()) {
+      Reflect.deleteProperty(db.data.sessions, sessionId);
+      await db.write();
+      return reply.status(401).send('Invalid, session expired');
+    }
+
+    const user = db.data.users.find(v => v.id === session.id);
+
+    if (!user) return reply.status(400).send('Invalid, user not existed');
+
+    reply.send(user);
+  });
 };

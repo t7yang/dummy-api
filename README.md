@@ -25,6 +25,8 @@ Resources:
   - POST /login - the session last for 24 hours
     - request payload: `{ username: string; password: string }`
   - POST /logout
+  - GET /profile - get the current logged in user's profile
+    - response payload: `User` 
 - /cart
   - GET /:id
   - GET /user/:id - get specific user's cart
