@@ -3,8 +3,6 @@ import { db } from '../../db/index.js';
 
 export const addLoginHook = (fastify: FastifyInstance) => {
   fastify.addHook('preHandler', async (request, reply) => {
-    const sessionId = request.cookies['session'];
-
     if (
       typeof request.query === 'object' &&
       request.query !== null &&
@@ -14,7 +12,13 @@ export const addLoginHook = (fastify: FastifyInstance) => {
       return;
     }
 
-    if (!sessionId || !db.data.sessions[sessionId] || db.data.sessions[sessionId].expired < Date.now()) {
+    const sessionId = request.cookies['session'];
+    const session = db.data.sessions[sessionId || ''];
+
+    if (!sessionId || !session) return reply.status(401).send('Unauthorized');
+    if (session.expired < Date.now()) {
+      Reflect.deleteProperty(db.data.sessions, sessionId);
+      await db.write();
       reply.status(401).send('Unauthorized');
     }
   });
