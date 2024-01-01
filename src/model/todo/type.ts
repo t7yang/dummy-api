@@ -16,7 +16,7 @@ export const todoCreateSchema = z.object({
 
 export const todosQuerySchema = z
   .object({
-    completed: booleanQuerySchema.pipe(z.boolean({ coerce: true })),
+    completed: booleanQuerySchema.transform(val => val === 'true'),
     userId: z.string().pipe(idQuerySchema),
   })
   .partial();
