@@ -59,6 +59,10 @@ Resources:
   - PUT /:id
     - request payload: `Pick<User, 'todo' | 'completed' | 'userId'>`
   - DELETE /:id
+  - DELETE /
+    - request query:
+      - completed?: `'true' | 'false'`
+      - userId?: `number`
 - /user
   - GET /:id
   - GET /

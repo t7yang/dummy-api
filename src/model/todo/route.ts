@@ -90,4 +90,24 @@ export const todoRoutes = async (fastify: FastifyInstance) => {
     await db.write();
     reply.send(todo);
   });
+
+  fastify.delete('/', async (request, reply) => {
+    const queries = todosQuerySchema.safeParse(request.query);
+
+    if (!queries.success) return reply.status(400).send('Invalid query parameters');
+
+    const { completed, userId } = queries.data;
+    const { kept, removed } = db.data.todos.reduce(
+      (grouped, todo) => {
+        todo.userId === userId && todo.completed === completed ? grouped.removed.push(todo) : grouped.kept.push(todo);
+        return grouped;
+      },
+      { kept: [] as Todo[], removed: [] as Todo[] },
+    );
+
+    db.data.todos = kept;
+    await db.write();
+
+    reply.send(removed);
+  });
 };
