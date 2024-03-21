@@ -1,4 +1,4 @@
-import { JSONPreset } from 'lowdb/node';
+import { JSONFilePreset } from 'lowdb/node';
 import { Cart } from '../model/cart/type.js';
 import { Product } from '../model/product/type.js';
 import { Todo } from '../model/todo/type.js';
@@ -12,4 +12,4 @@ const defaultData = {
   products: [] as Product[],
 };
 
-export const db = await JSONPreset(new URL('../../.db.json', import.meta.url), defaultData);
+export const db = await JSONFilePreset(new URL('../../.db.json', import.meta.url), defaultData);
