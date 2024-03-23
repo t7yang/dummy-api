@@ -4,11 +4,25 @@ import * as v from 'valibot';
 import { db } from '../../db/index.js';
 import { loginHook } from '../../routes/auth/handler.js';
 import { idParamSchema, paginationQuerySchema } from '../shared/schema/index.js';
-import { productQuerySchema } from './type.js';
+import { productQuerySchema, type Product } from './type.js';
 
 export const productRoutes = new Hono();
 
 productRoutes.use(loginHook);
+
+productRoutes.get('/autocomplete-list', async ctx => {
+  const props: Record<keyof Pick<Product, 'brand' | 'category'>, Set<string>> = {
+    brand: new Set(),
+    category: new Set(),
+  };
+
+  for (const product of db.data.products) {
+    props.brand.add(product.brand);
+    props.category.add(product.category);
+  }
+
+  return ctx.json({ ...props, brand: Array.from(props.brand), category: Array.from(props.category) });
+});
 
 productRoutes.get('/:id', vValidator('param', idParamSchema), async ctx => {
   const id = ctx.req.valid('param').id;

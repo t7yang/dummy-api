@@ -43,6 +43,8 @@ Resources:
   - DELETE /:id
     - resposne payload: `Cart`
 - /product
+  - GET /autocomplete-list
+    - response payload: `{ brand: string[]; category: string[] }`
   - GET /:id
     - resposne payload: `Product`
   - GET /
