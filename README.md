@@ -2,6 +2,8 @@
 
 This is a Node.js API service that run locally for learning purpose. The Learner can run it locally and perform CRUD to update the data.
 
+Many thanks to [DummyJSON](https://github.com/Ovi/DummyJSON) for making such a great learning resource publicly available.
+
 ## Usage
 
 - Clone this repo.
@@ -29,14 +31,20 @@ Resources:
     - response payload: `User` 
 - /cart
   - GET /:id
+    - resposne payload: `Cart`
   - GET /user/:id - get specific user's cart
+    - resposne payload: `Cart`
   - POST /
     - requst payload: `{ userId: number; products: number[] }`
+    - resposne payload: `Cart`
   - PUT /:id
     - request payload: same as POST
+    - resposne payload: `Cart`
   - DELETE /:id
+    - resposne payload: `Cart`
 - /product
   - GET /:id
+    - resposne payload: `Product`
   - GET /
     - request query:
       - keyword?: keyword in title or description (multiple)
@@ -48,21 +56,30 @@ Resources:
       - maxDiscount?: maximum discount percentage
       - minRating?: minimum rating
       - maxRating?: maximum rating
+    - resposne payload: `{ products: Product[]; total: number }`
 - /todo
   - GET /:id
+    - resposne payload: `Todo`
   - GET /
     - request query:
       - completed?: `'true' | 'false'`
       - userId?: `number`
+    - resposne payload: `{ todos: Todo[]; total: number }`
   - POST /
     - request payload: `Pick<User, 'todo' | 'completed' | 'userId'>`
+    - resposne payload: `Todo`
   - PUT /:id
     - request payload: `Pick<User, 'todo' | 'completed' | 'userId'>`
+    - resposne payload: `Todo`
   - DELETE /:id
+    - resposne payload: `Todo`
   - DELETE /
     - request query:
       - completed?: `'true' | 'false'`
       - userId?: `number`
+    - resposne payload: `Todo[]`
 - /user
   - GET /:id
+    - resposne payload: `User`
   - GET /
+    - resposne payload: `{ users: User[]; total: number }`
