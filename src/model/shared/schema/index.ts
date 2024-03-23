@@ -1,17 +1,16 @@
-import { z } from 'zod';
+import * as v from 'valibot';
 
-export const booleanQuerySchema = z.enum(['true', 'false']);
+export const booleanQuerySchema = v.picklist(['true', 'false']);
 
-export const idSchema = z.number().int().min(1);
+export const idSchema = v.number([v.integer(), v.minValue(1)]);
 
-export const idQuerySchema = z.number({ coerce: true }).int().min(1);
+export const idQuerySchema = v.coerce(idSchema, Number);
 
-export const idParamSchema = z.object({ id: idQuerySchema });
+export const idParamSchema = v.object({ id: idQuerySchema });
 
-const paginationSchema = z.number({ coerce: true }).int().min(0);
+const paginationSchema = v.coerce(v.number([v.integer(), v.minValue(0)]), Number);
 
-export const paginationQuerySchema = z
-  .object({ skip: z.string(), limit: z.string() })
-  .partial()
-  .default({ skip: '0', limit: '12' })
-  .pipe(z.object({ skip: paginationSchema.default(0), limit: paginationSchema.default(12) }));
+export const paginationQuerySchema = v.object({
+  skip: v.optional(paginationSchema, 0),
+  limit: v.optional(paginationSchema, 12),
+});

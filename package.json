@@ -13,12 +13,11 @@
   "author": "t7yang <t7yang@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@fastify/cookie": "^9.3.1",
-    "@fastify/static": "^7.0.1",
-    "fastify": "^4.26.2",
-    "fastify-cors": "^6.1.0",
+    "@hono/node-server": "^1.8.2",
+    "@hono/valibot-validator": "^0.2.2",
+    "hono": "^4.1.3",
     "lowdb": "^7.0.1",
-    "zod": "^3.22.4"
+    "valibot": "^0.30.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

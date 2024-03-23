@@ -1,8 +1,8 @@
 import { JSONFilePreset } from 'lowdb/node';
-import { Cart } from '../model/cart/type.js';
-import { Product } from '../model/product/type.js';
-import { Todo } from '../model/todo/type.js';
-import { type User } from '../model/user/type.js';
+import type { Cart } from '../model/cart/type';
+import type { Product } from '../model/product/type';
+import type { Todo } from '../model/todo/type';
+import type { User } from '../model/user/type';
 
 const defaultData = {
   sessions: {} as Record<string, Pick<User, 'id'> & { expired: number }>,

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as v from 'valibot';
 import { booleanQuerySchema, idQuerySchema, idSchema } from '../shared/schema/index.js';
 
 export interface Todo {
@@ -8,15 +8,21 @@ export interface Todo {
   userId: number;
 }
 
-export const todoCreateSchema = z.object({
-  todo: z.string(),
-  completed: z.boolean(),
-  userId: idSchema,
-});
+export const todoCreateSchema = v.object(
+  {
+    todo: v.string(),
+    completed: v.boolean(),
+    userId: idSchema,
+  },
+  v.never(),
+);
 
-export const todosQuerySchema = z
-  .object({
-    completed: booleanQuerySchema.transform(val => val === 'true'),
-    userId: z.string().pipe(idQuerySchema),
-  })
-  .partial();
+export const todosQuerySchema = v.partial(
+  v.object(
+    {
+      completed: v.transform(booleanQuerySchema, input => input === 'true'),
+      userId: v.transform(v.string(), Number, idQuerySchema),
+    },
+    v.never(),
+  ),
+);

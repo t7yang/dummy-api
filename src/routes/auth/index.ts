@@ -1,22 +1,21 @@
-// src/routes/auth/index.ts
-import { FastifyInstance } from 'fastify';
-import { z } from 'zod';
-import { db } from '../../db/index.js';
+import { vValidator } from '@hono/valibot-validator';
+import { Hono } from 'hono';
+import { getSignedCookie, setSignedCookie } from 'hono/cookie';
+import * as v from 'valibot';
+import { db } from '../../db';
+import { Cookie } from './cookie';
 
-const loginSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-});
+export const authRoutes = new Hono();
 
-export const authRoutes = async (fastify: FastifyInstance) => {
-  fastify.post('/login', async (request, reply) => {
-    const payload = loginSchema.safeParse(request.body);
+authRoutes.post(
+  '/login',
+  vValidator('json', v.object({ username: v.string(), password: v.string() }, v.never())),
+  async ctx => {
+    const { username, password } = ctx.req.valid('json');
 
-    if (!payload.success) return reply.status(400).send({ message: 'Invalid request payload' });
+    const user = db.data.users.find(u => u.username === username && u.password === password);
 
-    const user = db.data.users.find(u => u.username === payload.data.username && u.password === payload.data.password);
-
-    if (!user) return reply.status(400).send('Invalid username or password');
+    if (!user) return ctx.text('Invalid username or password', 400);
 
     const sessionId = Math.random().toString(36).substring(7);
     const expired = Date.now() + 1000 * 60 * 60 * 24;
@@ -24,37 +23,41 @@ export const authRoutes = async (fastify: FastifyInstance) => {
     db.data.sessions[sessionId] = { id: user.id, expired };
     await db.write();
 
-    reply.setCookie('session', sessionId, { expires: new Date(expired), httpOnly: true, path: '/' });
+    await setSignedCookie(ctx, Cookie.name, sessionId, Cookie.secret, {
+      expires: new Date(expired),
+      httpOnly: true,
+      path: '/',
+    });
 
-    return { message: 'Login successful' };
-  });
+    return ctx.json({ message: 'Login successful' });
+  },
+);
 
-  fastify.post('/logout', async (request, reply) => {
-    const sessionId = request.cookies.session;
+authRoutes.post('/logout', async ctx => {
+  const sessionId = await getSignedCookie(ctx, Cookie.secret, Cookie.name);
 
-    if (sessionId && db.data.sessions[sessionId]) {
-      Reflect.deleteProperty(db.data.sessions, sessionId);
-      await db.write();
-    }
+  if (sessionId && db.data.sessions[sessionId]) {
+    Reflect.deleteProperty(db.data.sessions, sessionId);
+    await db.write();
+  }
 
-    reply.send({ message: 'Logout successful' });
-  });
+  return ctx.json({ message: 'Logout successful' });
+});
 
-  fastify.get('/profile', async (request, reply) => {
-    const sessionId = request.cookies.session;
-    const session = db.data.sessions[sessionId || ''];
+authRoutes.get('/profile', async ctx => {
+  const sessionId = await getSignedCookie(ctx, Cookie.secret, Cookie.name);
+  const session = db.data.sessions[sessionId || ''];
 
-    if (!sessionId || !session) return reply.status(401).send('Invalid, no session found');
-    if (session.expired < Date.now()) {
-      Reflect.deleteProperty(db.data.sessions, sessionId);
-      await db.write();
-      return reply.status(401).send('Invalid, session expired');
-    }
+  if (!sessionId || !session) return ctx.text('Invalid, no session found', 401);
+  if (session.expired < Date.now()) {
+    Reflect.deleteProperty(db.data.sessions, sessionId);
+    await db.write();
+    return ctx.text('Invalid, session expired', 401);
+  }
 
-    const user = db.data.users.find(v => v.id === session.id);
+  const user = db.data.users.find(v => v.id === session.id);
 
-    if (!user) return reply.status(400).send('Invalid, user not existed');
+  if (!user) return ctx.text('Invalid, user not existed', 400);
 
-    reply.send(user);
-  });
-};
+  return ctx.json(user);
+});

@@ -1,7 +1,7 @@
-import { Product } from '../model/product/type.js';
-import { Todo } from '../model/todo/type.js';
-import { User } from '../model/user/type.js';
-import { db } from './index.js';
+import { db } from '.';
+import type { Product } from '../model/product/type';
+import type { Todo } from '../model/todo/type';
+import type { User } from '../model/user/type';
 
 const seeds = [
   function getUsers() {

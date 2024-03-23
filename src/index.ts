@@ -1,31 +1,34 @@
-import fastifyCookie from '@fastify/cookie';
-import fastifyStatic from '@fastify/static';
-import fastify from 'fastify';
-import { cartRoutes } from './model/cart/routes.js';
-import { productRoutes } from './model/product/routes.js';
-import { todoRoutes } from './model/todo/route.js';
-import { userRoutes } from './model/user/routes.js';
-import { authRoutes } from './routes/auth/index.js';
+import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { Hono } from 'hono';
+import { logger } from 'hono/logger';
+import { cartRoutes } from './model/cart/routes';
+import { productRoutes } from './model/product/routes';
+import { todoRoutes } from './model/todo/route';
+import { userRoutes } from './model/user/routes';
+import { authRoutes } from './routes/auth';
 
-const server = fastify({ logger: true });
+const app = new Hono();
 
-server.register(fastifyCookie, { secret: 'iwagowfwe', hook: 'onRequest' });
-server.register(fastifyStatic, { root: new URL('../public', import.meta.url) });
+app.use(logger());
+app.use('/*', serveStatic({ root: './public' }));
 
-server.register(authRoutes, { prefix: '/auth' });
-server.register(userRoutes, { prefix: '/user' });
-server.register(todoRoutes, { prefix: '/todo' });
-server.register(cartRoutes, { prefix: '/cart' });
-server.register(productRoutes, { prefix: '/product' });
+app.route('/auth', authRoutes);
+app.route('/user', userRoutes);
+app.route('/todo', todoRoutes);
+app.route('/cart', cartRoutes);
+app.route('/product', productRoutes);
 
-server.get('/hello', async () => {
-  return `Hello World`;
+app.get('/', c => {
+  return c.html(`<div><h1>Create an index.html under the public folder</h1></div>`);
 });
 
-server.listen({ port: 4000 }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
-  }
-  console.log(`Server listening at ${address}`);
+app.onError((err, ctx) => {
+  console.log(err);
+  return ctx.text('Internal service error');
 });
+
+const port = 4000;
+console.log(`Server is running on port ${port} at ${new Date()}`);
+
+serve({ fetch: app.fetch, port });

@@ -1,104 +1,85 @@
-import { FastifyInstance } from 'fastify';
-import { db } from '../../db/index.js';
-import { addLoginHook } from '../../routes/auth/handler.js';
-import { getItemById, getNextId } from '../shared/calc/data.js';
-import { idParamSchema } from '../shared/schema/index.js';
-import { isAllIdExist } from '../shared/validation/index.js';
-import { Cart, cartCreateSchema } from './type.js';
+import { vValidator } from '@hono/valibot-validator';
+import { Hono } from 'hono';
+import { db } from '../../db';
+import { loginHook } from '../../routes/auth/handler';
+import { getItemById, getNextId } from '../shared/calc/data';
+import { idParamSchema } from '../shared/schema';
+import { isAllIdExist } from '../shared/validation';
+import { cartCreateSchema, type Cart } from './type';
 
-export const cartRoutes = async (fastify: FastifyInstance) => {
-  addLoginHook(fastify);
+export const cartRoutes = new Hono();
 
-  fastify.get('/:id', async (request, reply) => {
-    const id = idParamSchema.safeParse(request.params);
+cartRoutes.use(loginHook);
 
-    if (!id.success) return reply.status(400).send('Invalid id');
+cartRoutes.get('/:id', vValidator('param', idParamSchema), async ctx => {
+  const id = ctx.req.valid('param').id;
+  const cart = db.data.carts.find(v => v.id === id);
 
-    const cart = db.data.carts.find(v => v.id === id.data.id);
+  return cart ? ctx.json(cart) : ctx.text('Cart not found', 404);
+});
 
-    if (cart) {
-      reply.send(cart);
-    } else {
-      reply.status(404).send('Cart not found');
-    }
-  });
+cartRoutes.get('/user/:id', vValidator('param', idParamSchema), async ctx => {
+  const id = ctx.req.valid('param').id;
+  const cart = db.data.carts.find(v => v.userId === id);
 
-  fastify.get('/user/:id', async (request, reply) => {
-    const id = idParamSchema.safeParse(request.params);
+  if (!cart) return ctx.json(null);
 
-    if (!id.success) return reply.status(400).send('Invalid id');
+  const products = new Map(db.data.products.map(p => [p.id, p]));
+  const dto = Object.assign({}, cart, { products: cart.products.map(id => products.get(id)) });
 
-    const cart = db.data.carts.find(v => v.userId === id.data.id);
+  return ctx.json(dto);
+});
 
-    if (!cart) return null;
+cartRoutes.post('/', vValidator('json', cartCreateSchema), async ctx => {
+  const payload = ctx.req.valid('json');
+  const user = getItemById(db.data.users, payload.userId);
 
-    const products = new Map(db.data.products.map(p => [p.id, p]));
-    const dto = Object.assign({}, cart, { products: cart.products.map(id => products.get(id)) });
+  if (!user) return ctx.text('Invalid userId', 400);
 
-    return dto;
-  });
+  const isProductIdsOk = isAllIdExist(db.data.products, payload.products);
+  if (!isProductIdsOk) return ctx.text('Found invalid product id', 400);
 
-  fastify.post('/', async (request, reply) => {
-    const payload = cartCreateSchema.safeParse(request.body);
+  const newId = getNextId(db.data.carts);
 
-    if (!payload.success) return reply.status(400).send('Invalid payload');
+  const newCart: Cart = { id: newId, ...payload };
 
-    const dto = payload.data;
+  db.data.carts.push(newCart);
+  await db.write();
 
-    const user = getItemById(db.data.users, dto.userId);
-    if (!user) return reply.status(400).send('Invalid userId');
+  return ctx.json(newCart);
+});
 
-    const isProductIdsOk = isAllIdExist(db.data.products, dto.products);
-    if (!isProductIdsOk) return reply.status(400).send('Found invalid product id');
+cartRoutes.put('/:id', vValidator('param', idParamSchema), vValidator('json', cartCreateSchema), async ctx => {
+  const id = ctx.req.valid('param').id;
+  const payload = ctx.req.valid('json');
 
-    const newId = getNextId(db.data.carts);
+  const existing = getItemById(db.data.carts, id);
+  if (!existing) return ctx.text('Cart not found', 404);
 
-    const newCart: Cart = { id: newId, ...dto };
+  if (payload.userId) {
+    const user = getItemById(db.data.users, payload.userId);
+    if (!user) ctx.text('Invalid userId', 400);
+  }
 
-    db.data.carts.push(newCart);
-    await db.write();
+  if (payload.products) {
+    const isProductIdsOk = isAllIdExist(db.data.products, payload.products);
+    if (!isProductIdsOk) return ctx.text('Found invalid product id', 400);
+  }
 
-    reply.send(newCart);
-  });
+  Object.assign(existing, payload);
+  await db.write();
+  return ctx.json(existing);
+});
 
-  fastify.put('/:id', async (request, reply) => {
-    const id = idParamSchema.safeParse(request.params);
-    const payload = cartCreateSchema.partial().safeParse(request.body);
+cartRoutes.put('/:id', vValidator('param', idParamSchema), async ctx => {
+  const id = ctx.req.valid('param').id;
 
-    if (!id.success || !payload.success) return reply.status(400).send('Invalid id or payload');
+  // Verify if the todo with the given id exists
+  const index = db.data.carts.findIndex(i => i.id === id);
 
-    const dto = payload.data;
+  if (index === -1) return ctx.text('Cart not found', 404);
 
-    const existing = getItemById(db.data.carts, id.data.id);
-    if (!existing) return reply.status(404).send('Cart not found');
-
-    if (dto.userId) {
-      const user = getItemById(db.data.users, dto.userId);
-      if (!user) return reply.status(400).send('Invalid userId');
-    }
-
-    if (dto.products) {
-      const isProductIdsOk = isAllIdExist(db.data.products, dto.products);
-      if (!isProductIdsOk) return reply.status(400).send('Found invalid product id');
-    }
-
-    Object.assign(existing, dto);
-    await db.write();
-    return existing;
-  });
-
-  fastify.delete('/:id', async (request, reply) => {
-    const id = idParamSchema.safeParse(request.params);
-
-    if (!id.success) return reply.status(400).send('Invalid id');
-
-    // Verify if the todo with the given id exists
-    const index = db.data.carts.findIndex(i => i.id === id.data.id);
-
-    if (index === -1) return reply.status(404).send('Cart not found');
-
-    const todo = db.data.todos.splice(index, 1)[0];
-    await db.write();
-    reply.send(todo);
-  });
-};
+  const todo = db.data.todos.splice(index, 1)[0];
+  await db.write();
+  return ctx.json(todo);
+});

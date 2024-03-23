@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as v from 'valibot';
 
 export interface Product {
   id: number;
@@ -14,34 +14,23 @@ export interface Product {
   images: string[];
 }
 
-const queryText = z.string().min(1);
-const number = z.number({ coerce: true }).gte(0);
-const multipleTexts = z.union([z.array(queryText), queryText]);
-export const productQuerySchema = z
-  .object({
-    keyword: multipleTexts,
-    brand: multipleTexts,
-    category: multipleTexts,
-    minPrice: queryText,
-    maxPrice: queryText,
-    minDiscount: queryText,
-    maxDiscount: queryText,
-    minRating: queryText,
-    maxRating: queryText,
-  })
-  .partial()
-  .pipe(
-    z
-      .object({
-        keyword: multipleTexts,
-        brand: multipleTexts,
-        category: multipleTexts,
-        minPrice: number.int(),
-        maxPrice: number.int(),
-        minDiscount: number,
-        maxDiscount: number,
-        minRating: number,
-        maxRating: number,
-      })
-      .partial(),
-  );
+const queryText = v.string([v.minLength(1)]);
+const number = v.coerce(v.number([v.minValue(0)]), Number);
+const multipleTexts = v.union([v.array(queryText), queryText]);
+
+export const productQuerySchema = v.partial(
+  v.object(
+    {
+      keyword: multipleTexts,
+      brand: multipleTexts,
+      category: multipleTexts,
+      minPrice: v.transform(v.string([v.minLength(1)]), Number, number),
+      maxPrice: v.transform(v.string([v.minLength(1)]), Number, number),
+      minDiscount: number,
+      maxDiscount: number,
+      minRating: number,
+      maxRating: number,
+    },
+    v.never(),
+  ),
+);

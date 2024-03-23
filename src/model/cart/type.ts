@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { idSchema } from '../shared/schema/index.js';
+import * as v from 'valibot';
+import { idSchema } from '../shared/schema';
 
 export interface Cart {
   id: number;
@@ -7,7 +7,10 @@ export interface Cart {
   products: number[];
 }
 
-export const cartCreateSchema = z.object({
-  userId: idSchema,
-  products: z.array(idSchema),
-});
+export const cartCreateSchema = v.object(
+  {
+    userId: v.number([v.integer(), v.minValue(1)]),
+    products: v.array(idSchema),
+  },
+  v.never(),
+);
