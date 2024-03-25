@@ -16,6 +16,6 @@ export const loginHook: MiddlewareHandler = async (ctx, next) => {
   if (session.expired < Date.now()) {
     Reflect.deleteProperty(db.data.sessions, sessionId);
     await db.write();
-    ctx.text('Unauthorized', 401);
+    return ctx.text('Unauthorized', 401);
   }
 };

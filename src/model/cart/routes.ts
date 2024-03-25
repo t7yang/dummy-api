@@ -58,7 +58,7 @@ cartRoutes.put('/:id', vValidator('param', idParamSchema), vValidator('json', ca
 
   if (payload.userId) {
     const user = getItemById(db.data.users, payload.userId);
-    if (!user) ctx.text('Invalid userId', 400);
+    if (!user) return ctx.text('Invalid userId', 400);
   }
 
   if (payload.products) {
