@@ -13,9 +13,9 @@
   "author": "t7yang <t7yang@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@hono/node-server": "^1.8.2",
+    "@hono/node-server": "^1.9.0",
     "@hono/valibot-validator": "^0.2.2",
-    "hono": "^4.1.3",
+    "hono": "^4.1.4",
     "lowdb": "^7.0.1",
     "valibot": "^0.30.0"
   },
