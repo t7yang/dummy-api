@@ -20,6 +20,7 @@ Common:
 - Each GET / API has an optional `?skip=number&limit=number` query pair to control how many items to retrieve, default is `skip=0&limit=12`.
 - Each request should contains the session cookie, to skip the auth guard, you can request with `?auth=0`.
 - To properly test the APIs, you can create an index.html in the public folder and then use the `fetch` to request the APIs.
+- All APIs below should prefix with `/api`, for example, `/api/auth/profile`.
 
 Resources:
 

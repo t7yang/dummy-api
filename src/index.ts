@@ -13,11 +13,11 @@ const app = new Hono();
 app.use(logger());
 app.use('/*', serveStatic({ root: './public' }));
 
-app.route('/auth', authRoutes);
-app.route('/user', userRoutes);
-app.route('/todo', todoRoutes);
-app.route('/cart', cartRoutes);
-app.route('/product', productRoutes);
+app.route('/api/auth', authRoutes);
+app.route('/api/user', userRoutes);
+app.route('/api/todo', todoRoutes);
+app.route('/api/cart', cartRoutes);
+app.route('/api/product', productRoutes);
 
 app.get('/', c => {
   return c.html(`<div><h1>Create an index.html under the public folder</h1></div>`);
