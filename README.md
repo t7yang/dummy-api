@@ -68,10 +68,10 @@ Resources:
       - userId?: `number`
     - resposne payload: `{ todos: Todo[]; total: number }`
   - POST /
-    - request payload: `Pick<User, 'todo' | 'completed' | 'userId'>`
+    - request payload: `Pick<Todo, 'todo' | 'completed' | 'userId'>`
     - resposne payload: `Todo`
   - PUT /:id
-    - request payload: `Pick<User, 'todo' | 'completed' | 'userId'>`
+    - request payload: `Pick<Todo, 'todo' | 'completed' | 'userId'>`
     - resposne payload: `Todo`
   - DELETE /:id
     - resposne payload: `Todo`
