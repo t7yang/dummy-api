@@ -13,15 +13,15 @@
   "author": "t7yang <t7yang@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@hono/node-server": "^1.11.1",
-    "@hono/valibot-validator": "^0.2.5",
-    "hono": "^4.4.0",
+    "@hono/node-server": "^1.11.4",
+    "@hono/valibot-validator": "^0.3.0",
+    "hono": "^4.4.7",
     "lowdb": "^7.0.1",
-    "valibot": "^0.30.0"
+    "valibot": "^0.33.3"
   },
   "devDependencies": {
-    "@types/node": "^20.12.12",
-    "tsx": "^4.11.0",
-    "typescript": "^5.4.5"
+    "@types/node": "^20.14.8",
+    "tsx": "^4.15.7",
+    "typescript": "^5.5.2"
   }
 }
