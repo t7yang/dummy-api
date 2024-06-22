@@ -14,23 +14,21 @@ export interface Product {
   images: string[];
 }
 
-const queryText = v.string([v.minLength(1)]);
-const number = v.coerce(v.number([v.minValue(0)]), Number);
+const queryText = v.pipe(v.string(), v.minLength(1));
+const number = v.pipe(v.string(), v.transform(Number), v.minValue(0));
+const price = v.pipe(v.string(), v.minLength(1), v.transform(Number), v.minValue(0));
 const multipleTexts = v.union([v.array(queryText), queryText]);
 
 export const productQuerySchema = v.partial(
-  v.object(
-    {
-      keyword: multipleTexts,
-      brand: multipleTexts,
-      category: multipleTexts,
-      minPrice: v.transform(v.string([v.minLength(1)]), Number, number),
-      maxPrice: v.transform(v.string([v.minLength(1)]), Number, number),
-      minDiscount: number,
-      maxDiscount: number,
-      minRating: number,
-      maxRating: number,
-    },
-    v.never(),
-  ),
+  v.object({
+    keyword: multipleTexts,
+    brand: multipleTexts,
+    category: multipleTexts,
+    minPrice: price,
+    maxPrice: price,
+    minDiscount: number,
+    maxDiscount: number,
+    minRating: number,
+    maxRating: number,
+  }),
 );

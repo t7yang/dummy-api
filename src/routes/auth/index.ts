@@ -7,31 +7,27 @@ import { Cookie } from './cookie';
 
 export const authRoutes = new Hono();
 
-authRoutes.post(
-  '/login',
-  vValidator('json', v.object({ username: v.string(), password: v.string() }, v.never())),
-  async ctx => {
-    const { username, password } = ctx.req.valid('json');
+authRoutes.post('/login', vValidator('json', v.object({ username: v.string(), password: v.string() })), async ctx => {
+  const { username, password } = ctx.req.valid('json');
 
-    const user = db.data.users.find(u => u.username === username && u.password === password);
+  const user = db.data.users.find(u => u.username === username && u.password === password);
 
-    if (!user) return ctx.text('Invalid username or password', 400);
+  if (!user) return ctx.text('Invalid username or password', 400);
 
-    const sessionId = Math.random().toString(36).substring(7);
-    const expired = Date.now() + 1000 * 60 * 60 * 24;
+  const sessionId = Math.random().toString(36).substring(7);
+  const expired = Date.now() + 1000 * 60 * 60 * 24;
 
-    db.data.sessions[sessionId] = { id: user.id, expired };
-    await db.write();
+  db.data.sessions[sessionId] = { id: user.id, expired };
+  await db.write();
 
-    await setSignedCookie(ctx, Cookie.name, sessionId, Cookie.secret, {
-      expires: new Date(expired),
-      httpOnly: true,
-      path: '/',
-    });
+  await setSignedCookie(ctx, Cookie.name, sessionId, Cookie.secret, {
+    expires: new Date(expired),
+    httpOnly: true,
+    path: '/',
+  });
 
-    return ctx.json({ message: 'Login successful' });
-  },
-);
+  return ctx.json({ message: 'Login successful' });
+});
 
 authRoutes.post('/logout', async ctx => {
   const sessionId = await getSignedCookie(ctx, Cookie.secret, Cookie.name);

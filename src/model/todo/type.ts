@@ -8,21 +8,19 @@ export interface Todo {
   userId: number;
 }
 
-export const todoCreateSchema = v.object(
-  {
-    todo: v.string(),
-    completed: v.boolean(),
-    userId: idSchema,
-  },
-  v.never(),
-);
+export const todoCreateSchema = v.object({
+  todo: v.string(),
+  completed: v.boolean(),
+  userId: idSchema,
+});
 
 export const todosQuerySchema = v.partial(
-  v.object(
-    {
-      completed: v.transform(booleanQuerySchema, input => input === 'true'),
-      userId: v.transform(v.string(), Number, idQuerySchema),
-    },
-    v.never(),
-  ),
+  v.object({
+    completed: v.pipe(
+      v.string(),
+      booleanQuerySchema,
+      v.transform(input => input === 'true'),
+    ),
+    userId: idQuerySchema,
+  }),
 );
