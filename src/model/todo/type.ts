@@ -1,5 +1,5 @@
 import * as v from 'valibot';
-import { booleanQuerySchema, idQuerySchema, idSchema } from '../shared/schema/index.js';
+import { booleanQuerySchema, idSchema } from '../shared/schema/index.js';
 
 export interface Todo {
   id: number;
@@ -8,19 +8,14 @@ export interface Todo {
   userId: number;
 }
 
-export const todoCreateSchema = v.object({
+export const todoUpdateSchema = v.object({
   todo: v.string(),
   completed: v.boolean(),
+});
+
+export const todoCreateSchema = v.object({
+  ...todoUpdateSchema.entries,
   userId: idSchema,
 });
 
-export const todosQuerySchema = v.partial(
-  v.object({
-    completed: v.pipe(
-      v.string(),
-      booleanQuerySchema,
-      v.transform(input => input === 'true'),
-    ),
-    userId: idQuerySchema,
-  }),
-);
+export const todosQuerySchema = v.partial(v.object({ completed: booleanQuerySchema }));

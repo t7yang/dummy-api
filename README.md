@@ -33,10 +33,10 @@ Resources:
 - /cart
   - GET /:id
     - resposne payload: `Cart`
-  - GET /user/:id - get specific user's cart
-    - resposne payload: `Cart`
+  - GET /my - get specific user's cart
+    - resposne payload: `Cart | null`
   - POST /
-    - requst payload: `{ userId: number; products: number[] }`
+    - requst payload: `{ products: number[] }`
     - resposne payload: `Cart`
   - PUT /:id
     - request payload: same as POST
@@ -66,20 +66,18 @@ Resources:
   - GET /
     - request query:
       - completed?: `'true' | 'false'`
-      - userId?: `number`
     - resposne payload: `{ todos: Todo[]; total: number }`
   - POST /
     - request payload: `Pick<Todo, 'todo' | 'completed' | 'userId'>`
     - resposne payload: `Todo`
   - PUT /:id
-    - request payload: `Pick<Todo, 'todo' | 'completed' | 'userId'>`
+    - request payload: `Pick<Todo, 'todo' | 'completed'>`
     - resposne payload: `Todo`
   - DELETE /:id
     - resposne payload: `Todo`
   - DELETE /
     - request query:
       - completed?: `'true' | 'false'`
-      - userId?: `number`
     - resposne payload: `Todo[]`
 - /user
   - GET /:id

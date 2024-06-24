@@ -1,6 +1,12 @@
 import * as v from 'valibot';
 
-export const booleanQuerySchema = v.picklist(['true', 'false']);
+export const booleanQueryOptionsSchema = v.picklist(['true', 'false']);
+
+export const booleanQuerySchema = v.pipe(
+  v.string(),
+  booleanQueryOptionsSchema,
+  v.transform(input => input === 'true'),
+);
 
 export const idSchema = v.pipe(v.number(), v.integer(), v.minValue(1));
 

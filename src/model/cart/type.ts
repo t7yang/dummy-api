@@ -7,7 +7,4 @@ export interface Cart {
   products: number[];
 }
 
-export const cartCreateSchema = v.object({
-  userId: idSchema,
-  products: v.array(idSchema),
-});
+export const cartCreateSchema = v.object({ products: v.array(idSchema) });
