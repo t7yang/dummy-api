@@ -12,17 +12,6 @@ export const cartRoutes = new Hono();
 
 cartRoutes.use(loginHook);
 
-cartRoutes.get('/:id', vValidator('param', idParamSchema), async ctx => {
-  const user = UserContext.getter(ctx);
-  const id = ctx.req.valid('param').id;
-  const cart = db.data.carts.find(v => v.id === id);
-
-  if (!cart) return ctx.text('Cart not found', 404);
-  if (cart.userId !== user.id) return ctx.text('Forbidden', 403);
-
-  return ctx.json(cart);
-});
-
 cartRoutes.get('/my', async ctx => {
   const user = UserContext.getter(ctx);
   const cart = db.data.carts.find(v => v.userId === user.id);
@@ -33,6 +22,17 @@ cartRoutes.get('/my', async ctx => {
   const dto = Object.assign({}, cart, { products: cart.products.map(id => products.get(id)) });
 
   return ctx.json(dto);
+});
+
+cartRoutes.get('/:id', vValidator('param', idParamSchema), async ctx => {
+  const user = UserContext.getter(ctx);
+  const id = ctx.req.valid('param').id;
+  const cart = db.data.carts.find(v => v.id === id);
+
+  if (!cart) return ctx.text('Cart not found', 404);
+  if (cart.userId !== user.id) return ctx.text('Forbidden', 403);
+
+  return ctx.json(cart);
 });
 
 cartRoutes.post('/', vValidator('json', cartCreateSchema), async ctx => {
