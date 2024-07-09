@@ -33,7 +33,7 @@ Resources:
 - /cart
   - GET /:id
     - resposne payload: `Cart`
-  - GET /my - get specific user's cart
+  - GET /my - get current logged-in user's cart
     - resposne payload: `Cart | null`
   - POST /
     - requst payload: `{ products: number[] }`
