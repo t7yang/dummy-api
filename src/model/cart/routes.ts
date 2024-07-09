@@ -18,10 +18,7 @@ cartRoutes.get('/my', async ctx => {
 
   if (!cart) return ctx.json(null);
 
-  const products = new Map(db.data.products.map(p => [p.id, p]));
-  const dto = Object.assign({}, cart, { products: cart.products.map(id => products.get(id)) });
-
-  return ctx.json(dto);
+  return ctx.json(cart);
 });
 
 cartRoutes.get('/:id', vValidator('param', idParamSchema), async ctx => {
