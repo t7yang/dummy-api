@@ -16,7 +16,12 @@ cartRoutes.get('/my', async ctx => {
   const user = UserContext.getter(ctx);
   const cart = db.data.carts.find(v => v.userId === user.id);
 
-  if (!cart) return ctx.json(null);
+  if (!cart) {
+    const newCart: Cart = { id: getNextId(db.data.carts), userId: user.id, products: [] };
+    db.data.carts.push(newCart);
+    await db.write();
+    return ctx.json(newCart);
+  }
 
   return ctx.json(cart);
 });
